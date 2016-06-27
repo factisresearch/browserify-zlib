@@ -179,7 +179,7 @@ Object.keys(tests).forEach(function(file) {
                     JSON.stringify(opts) + ' ' +
                     Def.name + ' -> ' + Inf.name;
                 
-                tape('zlib ' + msg, function(t) {
+                tape('zlib (stream) ' + msg, function(t) {
                   t.plan(1);
                   
                   var def = new Def(opts);
@@ -195,6 +195,29 @@ Object.keys(tests).forEach(function(file) {
                   // the magic happens here.
                   ss.pipe(def).pipe(inf).pipe(buf);
                   ss.end(test);
+                });
+
+                tape('zlib (zlibBuffer) ' + msg, function(t) {
+                  t.plan(1);
+
+                  var def = new Def(opts);
+                  var inf = new Inf(opts);
+                  zlib.zlibBuffer(def, test, function(err, compressed) {
+                    zlib.zlibBuffer(inf, compressed, function(err, buffer) {
+                      t.deepEqual(buffer, test);
+                    });
+                  });
+                });
+
+                tape('zlib (zlibBufferSync) ' + msg, function(t) {
+                  t.plan(1);
+
+                  var def = new Def(opts);
+                  var inf = new Inf(opts);
+                  var compressed = zlib.zlibBufferSync(def, test);
+                  var buffer = zlib.zlibBufferSync(inf, compressed);
+                  t.deepEqual(buffer, test);
+
                 });
               });
             });
